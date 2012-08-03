@@ -5,9 +5,12 @@ Version 1.0
 
 For more information, please see 
 
-[View the project on Github](https:#github.com/OlivineLabs/mediator_lua)
+[View the project on Github](https://github.com/OlivineLabs/mediator_lua)
 
 [View the documentation](http://olivinelabs.com/mediator_lua)
+
+If you have [luarocks](http://luarocks.org), isntall it with `luarocks install mediator_lua`.
+If you don't, get it. If you really don't want to, just copy mediator.lua from the
 
 A utility class to help you manage events.
 ------------------------------------------
@@ -16,6 +19,7 @@ mediator\_lua is a simple class that allows you to listen to events by subscribi
 and sending data to channels. Its purpose is to help you decouple code where you
 might otherwise have functions calling functions calling functions, and instead
 simply call `mediator.publish("chat", { message = "hi" })`
+[Git repository](https://github.com/OlivineLabs/mediator_lua).
 
 Why?
 ----
