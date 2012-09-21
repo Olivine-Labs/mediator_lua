@@ -20,6 +20,6 @@ dependencies = {
 build = {
   type = "builtin",
    modules = {
-    mediator_lua = "mediator.lua"
+    mediator_lua = "src/mediator.lua"
   }
 }

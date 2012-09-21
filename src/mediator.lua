@@ -87,16 +87,16 @@ function Channel(namespace)
       for i,v in pairs(self.callbacks) do
         if self.stopped then return end
 
-        v.fn(unpack(arg))
+        v.fn(...)
       end
 
       if #channelNamespace > 0 then
         local nextNamespace = channelNamespace[1]
         table.remove(channelNamespace, 1)
-        self.channels[nextNamespace]:publish(channelNamespace, unpack(arg))
+        self.channels[nextNamespace]:publish(channelNamespace, ...)
       else
         for i,v in pairs(self.channels) do
-          v:publish({}, unpack(arg))
+          v:publish({}, ...)
         end
       end
     end,
@@ -146,7 +146,7 @@ local Mediator = setmetatable(
       end,
 
       publish = function(self,channelNamespace, ...)
-        self.channel:publish(channelNamespace, unpack(arg))
+        self.channel:publish(channelNamespace, ...)
       end
     }
   end
