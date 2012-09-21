@@ -87,7 +87,14 @@ function Channel(namespace)
       for i, v in pairs(self.callbacks) do
         if self.stopped then return end
 
-        v.fn(...)
+        if v.options and v.options.predicate then
+          if v.options.predicate(...) then
+            v.fn(...)
+          end
+        else
+          v.fn(...)
+        end
+
       end
 
       if #channelNamespace > 0 then

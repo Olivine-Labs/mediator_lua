@@ -263,4 +263,31 @@ describe("mediator", function()
     assert.are.equal(olddata, "didn't read lol")
     assert.are.equal(olddata2, "didn't read lol")
   end)
+
+  it("has predicates", function()
+    local olddata = "wat"
+    local olddata2 = "watwat"
+
+    local assertFn = function(data)
+      olddata = data
+    end
+
+    local assertFn2 = function(data)
+      olddata2 = data
+    end
+
+    local predicate = function()
+      return false
+    end
+
+    c:addChannel("level2")
+
+    local s = m:subscribe({"test","level2"}, assertFn)
+    local s2 = m:subscribe({"test"}, assertFn2, { predicate = predicate })
+
+    m:publish({"test"}, "didn't read lol")
+
+    assert.are.equal(olddata, "didn't read lol")
+    assert.are_not.equal(olddata2, "didn't read lol")
+  end)
 end)
