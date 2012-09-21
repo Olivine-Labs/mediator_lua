@@ -126,6 +126,14 @@ describe("mediator", function()
     assert.is.truthy(olddata.test)
   end)
 
+  it("PublishTest before subscriber exists #broken", function()
+    assert.is_not.error(function() m:publish({ "nope" }, data) end)
+  end)
+
+  it("PublishTest recursive before subscriber exists #broken", function()
+    assert.is_not.error(function() m:publish({ "nope", "wat" }, data) end)
+  end)
+
   it("PublishMultipleArgumentsTest", function()
     local data = { test = true }
     local arguments

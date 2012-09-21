@@ -6,7 +6,7 @@ function Subscriber(fn, options)
     fn = fn,
     channel = nil,
     id = math.random(1000000000), -- sounds reasonable, rite?
-    update = function(self,options)
+    update = function(self, options)
       if options then
         self.fn = options.fn or self.fn
         self.options = options.options or self.options
@@ -23,7 +23,7 @@ function Channel(namespace)
     namespace = namespace,
     callbacks = {},
     channels = {},
-    addSubscriber = function(self,fn, options)
+    addSubscriber = function(self, fn, options)
       local callback = Subscriber(fn, options)
       local priority = (#self.callbacks + 1)
 
@@ -38,18 +38,18 @@ function Channel(namespace)
       return callback
     end,
 
-    getSubscriber = function(self,id)
-      for i,v in pairs(self.callbacks) do
+    getSubscriber = function(self, id)
+      for i, v in pairs(self.callbacks) do
         if v.id == id then return { index = i, value = v } end
       end
 
-      for i,v in pairs(self.channels) do
+      for i, v in pairs(self.channels) do
         local sub = v:getSubscriber(id)
         if sub then return sub end
       end
     end,
 
-    setPriority = function(self,id, priority)
+    setPriority = function(self, id, priority)
       local callback = self:getSubscriber(id)
 
       if callback.value then
@@ -58,24 +58,24 @@ function Channel(namespace)
       end
     end,
 
-    addChannel = function(self,namespace)
+    addChannel = function(self, namespace)
       self.channels[namespace] = Channel(namespace)
       return self.channels[namespace]
     end,
 
-    hasChannel = function(self,namespace)
+    hasChannel = function(self, namespace)
       return self.channels[namespace] and true
     end,
 
-    getChannel = function(self,namespace)
+    getChannel = function(self, namespace)
       return self.channels[namespace]
     end,
 
-    removeSubscriber = function(self,id)
+    removeSubscriber = function(self, id)
       local callback = self:getSubscriber(id)
 
       if callback.value then
-        for i,v in pairs(self.channels) do
+        for i, v in pairs(self.channels) do
           v:removeSubscriber(id)
         end
 
@@ -83,8 +83,8 @@ function Channel(namespace)
       end
     end,
 
-    publish = function(self,channelNamespace, ...)
-      for i,v in pairs(self.callbacks) do
+    publish = function(self, channelNamespace, ...)
+      for i, v in pairs(self.callbacks) do
         if self.stopped then return end
 
         v.fn(...)
@@ -93,9 +93,10 @@ function Channel(namespace)
       if #channelNamespace > 0 then
         local nextNamespace = channelNamespace[1]
         table.remove(channelNamespace, 1)
+
         self.channels[nextNamespace]:publish(channelNamespace, ...)
       else
-        for i,v in pairs(self.channels) do
+        for i, v in pairs(self.channels) do
           v:publish({}, ...)
         end
       end
@@ -119,10 +120,10 @@ local Mediator = setmetatable(
     return {
       channel = Channel('root'),
 
-      getChannel = function(self,channelNamespace)
+      getChannel = function(self, channelNamespace)
         local channel = self.channel
 
-        for i,v in pairs(channelNamespace) do
+        for i, v in pairs(channelNamespace) do
           if not channel:hasChannel(v) then
             channel = channel:addChannel(v)
           else
@@ -133,19 +134,20 @@ local Mediator = setmetatable(
         return channel;
       end,
 
-      subscribe = function(self,channelNamespace, fn, options)
+      subscribe = function(self, channelNamespace, fn, options)
         return self:getChannel(channelNamespace):addSubscriber(fn, options)
       end,
 
-      getSubscriber = function(self,id, channelNamespace)
+      getSubscriber = function(self, id, channelNamespace)
         return self:getChannel(channelNamespace):getSubscriber(id)
       end,
 
-      removeSubscriber = function(self,id, channelNamespace)
+      removeSubscriber = function(self, id, channelNamespace)
         return self:getChannel(channelNamespace):removeSubscriber(id)
       end,
 
-      publish = function(self,channelNamespace, ...)
+      publish = function(self, channelNamespace, ...)
+        self:getChannel(channelNamespace)
         self.channel:publish(channelNamespace, ...)
       end
     }
