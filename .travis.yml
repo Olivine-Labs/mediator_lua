@@ -24,6 +24,10 @@ install:
   - cd busted
   - sudo luarocks make
   - cd ../
+  - git clone git://github.com/Olivine-Labs/mediator_lua.git
+  - cd mediator_lua
+  - sudo luarocks make
+  - cd ../
 
 script: "busted spec"
 
@@ -35,3 +39,4 @@ notifications:
   email:
     on_success: always
     on_failure: always
+
