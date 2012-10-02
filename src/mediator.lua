@@ -1,4 +1,7 @@
 -- Subscriber class and functions --
+local function tableAppend(source, toAppend)
+  for _,v in pairs(toAppend) do table.insert(source, v) end
+end
 
 function Subscriber(fn, options)
   return {
@@ -27,10 +30,12 @@ function Channel(namespace)
       local callback = Subscriber(fn, options)
       local priority = (#self.callbacks + 1)
 
-      if options and options.priority then
-        if options.priority >= 0 and options.priority < (#self.callbacks + 1) then
+      if
+        options and options.priority and
+        options.priority >= 0 and
+        options.priority < (#self.callbacks + 1)
+      then
           priority = options.priority
-        end
       end
 
       table.insert(self.callbacks, priority, callback)
@@ -42,11 +47,12 @@ function Channel(namespace)
       for i, v in pairs(self.callbacks) do
         if v.id == id then return { index = i, value = v } end
       end
-
-      for i, v in pairs(self.channels) do
-        local sub = v:getSubscriber(id)
-        if sub then return sub end
+      local sub
+      for _, v in pairs(self.channels) do
+        sub = v:getSubscriber(id)
+        if sub then break end
       end
+      return sub
     end,
 
     setPriority = function(self, id, priority)
@@ -64,49 +70,43 @@ function Channel(namespace)
     end,
 
     hasChannel = function(self, namespace)
-      return self.channels[namespace] and true
+      return namespace and self.channels[namespace] and true
     end,
 
     getChannel = function(self, namespace)
-      return self.channels[namespace]
+      return self.channels[namespace] or self:addChannel(namespace)
     end,
 
     removeSubscriber = function(self, id)
       local callback = self:getSubscriber(id)
 
-      if callback.value then
-        for i, v in pairs(self.channels) do
+      if callback and callback.value then
+        for _, v in pairs(self.channels) do
           v:removeSubscriber(id)
         end
 
-        table.remove(self.callbacks, callback.index)
+        return table.remove(self.callbacks, callback.index)
       end
     end,
 
     publish = function(self, channelNamespace, ...)
-      for i, v in pairs(self.callbacks) do
+      local result = {}
+      for _, v in pairs(self.callbacks) do
         if self.stopped then return end
-
-        if v.options and v.options.predicate then
-          if v.options.predicate(...) then
-            v.fn(...)
-          end
-        else
-          v.fn(...)
+        local run = v.options and not v.options.predicate or v.options and v.options.predicate and v.options.predicate(...)
+        if run then
+          local val = v.fn(...)
+          table.insert(result, val)
         end
-
       end
-
       if #channelNamespace > 0 then
-        local nextNamespace = channelNamespace[1]
-        table.remove(channelNamespace, 1)
-
-        self.channels[nextNamespace]:publish(channelNamespace, ...)
+        tableAppend(result, self:getChannel(table.remove(channelNamespace, 1)):publish(channelNamespace, ...))
       else
-        for i, v in pairs(self.channels) do
-          v:publish({}, ...)
+        for _, v in pairs(self.channels) do
+          tableAppend(result, v:publish({}, ...))
         end
       end
+      return result
     end,
 
     stopPropagation = function(self)
@@ -120,7 +120,7 @@ end
 local Mediator = setmetatable(
 {
   Channel = Channel,
-  Subscriber=Subscriber,
+  Subscriber=Subscriber
 },
 {
   __call=function (fn, options)
@@ -131,11 +131,7 @@ local Mediator = setmetatable(
         local channel = self.channel
 
         for i, v in pairs(channelNamespace) do
-          if not channel:hasChannel(v) then
-            channel = channel:addChannel(v)
-          else
-            channel = channel:getChannel(v)
-          end
+          channel = channel:getChannel(v)
         end
 
         return channel;
@@ -154,8 +150,7 @@ local Mediator = setmetatable(
       end,
 
       publish = function(self, channelNamespace, ...)
-        self:getChannel(channelNamespace)
-        self.channel:publish(channelNamespace, ...)
+        return self.channel:publish(channelNamespace, ...)
       end
     }
   end
