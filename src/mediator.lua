@@ -93,7 +93,7 @@ function Channel(namespace)
       local result = {}
       for _, v in pairs(self.callbacks) do
         if self.stopped then return end
-        local run = v.options and not v.options.predicate or v.options and v.options.predicate and v.options.predicate(...)
+        local run = not v.options or v.options and not v.options.predicate or v.options and v.options.predicate and v.options.predicate(...) or false
         if run then
           local val = v.fn(...)
           table.insert(result, val)
