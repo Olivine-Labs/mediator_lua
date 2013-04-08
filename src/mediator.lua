@@ -5,7 +5,7 @@ end
 
 local function Subscriber(fn, options)
   return {
-    options = options,
+    options = options or {},
     fn = fn,
     channel = nil,
     id = math.random(1000000000), -- sounds reasonable, rite?
@@ -20,12 +20,14 @@ end
 
 -- Channel class and functions --
 
-local function Channel(namespace)
+local function Channel(namespace, parent)
   return {
     stopped = false,
     namespace = namespace,
     callbacks = {},
     channels = {},
+    parent = parent,
+
     addSubscriber = function(self, fn, options)
       local callback = Subscriber(fn, options)
       local priority = (#self.callbacks + 1)
@@ -65,7 +67,7 @@ local function Channel(namespace)
     end,
 
     addChannel = function(self, namespace)
-      self.channels[namespace] = Channel(namespace)
+      self.channels[namespace] = Channel(namespace, self)
       return self.channels[namespace]
     end,
 
@@ -89,23 +91,25 @@ local function Channel(namespace)
       end
     end,
 
-    publish = function(self, channelNamespace, ...)
+    publish = function(self, ...)
       local result = {}
+
       for _, v in pairs(self.callbacks) do
-        if self.stopped then return end
-        local run = not v.options or v.options and not v.options.predicate or v.options and v.options.predicate and v.options.predicate(...) or false
-        if run then
+        if self.stopped then return result end
+
+        -- if it doesn't have a predicate, or it does and it's true then run it
+        if not v.options.predicate or (v.options.predicate and v.options.predicate(...)) then
+
+           -- just take the first result and insert it into the result table
           local val = v.fn(...)
           table.insert(result, val)
         end
       end
-      if #channelNamespace > 0 then
-        tableAppend(result, self:getChannel(table.remove(channelNamespace, 1)):publish(channelNamespace, ...))
-      else
-        for _, v in pairs(self.channels) do
-          tableAppend(result, v:publish({}, ...))
-        end
+
+      if parent then
+        tableAppend(result, parent:publish(...))
       end
+
       return result
     end,
 
@@ -120,10 +124,10 @@ end
 local Mediator = setmetatable(
 {
   Channel = Channel,
-  Subscriber=Subscriber
+  Subscriber = Subscriber
 },
 {
-  __call=function (fn, options)
+  __call = function (fn, options)
     return {
       channel = Channel('root'),
 
@@ -150,7 +154,7 @@ local Mediator = setmetatable(
       end,
 
       publish = function(self, channelNamespace, ...)
-        return self.channel:publish(channelNamespace, ...)
+        return self:getChannel(channelNamespace):publish(...)
       end
     }
   end

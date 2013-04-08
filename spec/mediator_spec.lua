@@ -121,7 +121,7 @@ describe("mediator", function()
     end
 
     local sub1 = c:addSubscriber(assertFn, {})
-    c:publish({}, data)
+    c:publish(data)
 
     assert.is.truthy(olddata.test)
   end)
@@ -143,7 +143,7 @@ describe("mediator", function()
     end
 
     local sub1 = c:addSubscriber(assertFn, {})
-    c:publish({}, "test", data, "wat", "seven")
+    c:publish("test", data, "wat", "seven")
 
     assert.are.equal(#arguments, 3)
   end)
@@ -164,12 +164,12 @@ describe("mediator", function()
 
     local sub1 = c:addSubscriber(assertFn, {})
     local sub2 = c:addSubscriber(assertFn2, {})
-    c:publish({}, data)
+    c:publish(data)
 
     assert.are.equal(olddata.test, 1)
   end)
 
-  it("PublishRecursiveTest", function()
+  it("PublishUpwardsRecursiveTest", function()
     local olddata = { test = false }
     local data = { test = true }
 
@@ -181,7 +181,7 @@ describe("mediator", function()
 
     local sub1 = c.channels["level2"]:addSubscriber(assertFn, {})
 
-    c:publish({}, data)
+    c.channels["level2"]:publish({}, data)
 
     assert.is.truthy(olddata.test)
   end)
@@ -255,10 +255,10 @@ describe("mediator", function()
 
     c:addChannel("level2")
 
-    local s = m:subscribe({"test","level2"}, assertFn)
-    local s2 = m:subscribe({"test"}, assertFn2)
+    local s = m:subscribe({ "test", "level2" }, assertFn)
+    local s2 = m:subscribe({ "test" }, assertFn2)
 
-    m:publish({"test"}, "didn't read lol")
+    m:publish({ "test", "level2" }, "didn't read lol")
 
     assert.are.equal(olddata, "didn't read lol")
     assert.are.equal(olddata2, "didn't read lol")
@@ -285,7 +285,7 @@ describe("mediator", function()
     local s = m:subscribe({"test","level2"}, assertFn)
     local s2 = m:subscribe({"test"}, assertFn2, { predicate = predicate })
 
-    m:publish({"test"}, "didn't read lol")
+    m:publish({"test", "level2"}, "didn't read lol")
 
     assert.are.equal(olddata, "didn't read lol")
     assert.are_not.equal(olddata2, "didn't read lol")
