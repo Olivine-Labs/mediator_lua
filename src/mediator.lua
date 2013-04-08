@@ -1,8 +1,3 @@
--- Subscriber class and functions --
-local function tableAppend(source, toAppend)
-  for _,v in pairs(toAppend) do table.insert(source, v) end
-end
-
 local function Subscriber(fn, options)
   return {
     options = options or {},
@@ -107,7 +102,7 @@ local function Channel(namespace, parent)
       end
 
       if parent then
-        tableAppend(result, parent:publish(...))
+        for _,v in pairs(parent:publish(...)) do table.insert(result, v) end
       end
 
       return result
