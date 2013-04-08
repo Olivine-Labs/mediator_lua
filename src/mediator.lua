@@ -3,7 +3,7 @@ local function tableAppend(source, toAppend)
   for _,v in pairs(toAppend) do table.insert(source, v) end
 end
 
-function Subscriber(fn, options)
+local function Subscriber(fn, options)
   return {
     options = options,
     fn = fn,
@@ -20,7 +20,7 @@ end
 
 -- Channel class and functions --
 
-function Channel(namespace)
+local function Channel(namespace)
   return {
     stopped = false,
     namespace = namespace,
