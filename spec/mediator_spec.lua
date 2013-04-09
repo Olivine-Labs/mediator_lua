@@ -126,11 +126,11 @@ describe("mediator", function()
     assert.is.truthy(olddata.test)
   end)
 
-  it("PublishTest before subscriber exists #broken", function()
+  it("PublishTest before subscriber exists", function()
     assert.is_not.error(function() m:publish({ "nope" }, data) end)
   end)
 
-  it("PublishTest recursive before subscriber exists #broken", function()
+  it("PublishTest recursive before subscriber exists", function()
     assert.is_not.error(function() m:publish({ "nope", "wat" }, data) end)
   end)
 
