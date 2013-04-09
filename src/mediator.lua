@@ -96,13 +96,13 @@ local function Channel(namespace, parent)
         if not v.options.predicate or (v.options.predicate and v.options.predicate(...)) then
 
            -- just take the first result and insert it into the result table
-          local val = v.fn(...)
-          table.insert(result, val)
+          table.insert(result, (v.fn(...)))
         end
       end
 
       if parent then
-        for _,v in pairs(parent:publish(...)) do table.insert(result, v) end
+        local value = parent:publish(...)
+        for k=1,#value do table.insert(result, value[k]) end
       end
 
       return result
@@ -129,8 +129,8 @@ local Mediator = setmetatable(
       getChannel = function(self, channelNamespace)
         local channel = self.channel
 
-        for i, v in pairs(channelNamespace) do
-          channel = channel:getChannel(v)
+        for i=1, #channelNamespace do
+          channel = channel:getChannel(channelNamespace[i])
         end
 
         return channel;
