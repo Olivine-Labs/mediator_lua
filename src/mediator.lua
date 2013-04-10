@@ -89,8 +89,9 @@ local function Channel(namespace, parent)
     publish = function(self, ...)
       local result = {}
 
-      for _, v in pairs(self.callbacks) do
+      for k=1, #self.callbacks do
         if self.stopped then return result end
+        local v = self.callbacks[k]
 
         -- if it doesn't have a predicate, or it does and it's true then run it
         if not v.options.predicate or (v.options.predicate and v.options.predicate(...)) then
