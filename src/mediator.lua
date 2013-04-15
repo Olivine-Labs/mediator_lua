@@ -27,9 +27,9 @@ local function Channel(namespace, parent)
       local callback = Subscriber(fn, options)
       local priority = (#self.callbacks + 1)
 
-      if
-        options and
-        options.priority and
+      options = options or {}
+
+      if options.priority and
         options.priority >= 0 and
         options.priority < priority
       then
@@ -89,13 +89,14 @@ local function Channel(namespace, parent)
     end,
 
     publish = function(self, result, ...)
-      for i=1, #self.callbacks do
+      for i = 1, #self.callbacks do
         local callback = self.callbacks[i]
 
         -- if it doesn't have a predicate, or it does and it's true then run it
         if not callback.options.predicate or callback.options.predicate(...) then
            -- just take the first result and insert it into the result table
           local value, continue = callback.fn(...)
+
           if value then table.insert(result, value) end
           if not continue then return result end
         end
@@ -143,9 +144,7 @@ local Mediator = setmetatable(
       end,
 
       publish = function(self, channelNamespace, ...)
-        local result = {}
-        self:getChannel(channelNamespace):publish(result, ...)
-        return result
+        return self:getChannel(channelNamespace):publish({}, ...)
       end
     }
   end

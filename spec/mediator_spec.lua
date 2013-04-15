@@ -19,31 +19,31 @@ describe("mediator", function()
   end)
 
   it("RegisterCallbacksTest", function()
-    local sub1 = c:addSubscriber(testfn, {})
+    local sub1 = c:addSubscriber(testfn)
 
     assert.are.equal(#c.callbacks, 1)
     assert.are.equal(c.callbacks[1].fn, testfn)
   end)
 
   it("RegisterMoreCallbacksTest", function()
-    local sub1 = c:addSubscriber(testfn, {})
-    local sub2 = c:addSubscriber(testfn2, {})
+    local sub1 = c:addSubscriber(testfn)
+    local sub2 = c:addSubscriber(testfn2)
 
     assert.are.equal(#c.callbacks, 2)
     assert.are.equal(c.callbacks[2].fn, sub2.fn)
   end)
 
   it("RegisterCallbacksWithPriorityTest", function()
-    local sub1 = c:addSubscriber(testfn, {})
-    local sub2 = c:addSubscriber(testfn2, {})
-    local sub3 = c:addSubscriber(testfn3, { priority = 1 }, {})
+    local sub1 = c:addSubscriber(testfn)
+    local sub2 = c:addSubscriber(testfn2)
+    local sub3 = c:addSubscriber(testfn3, { priority = 1 })
 
     assert.are.equal(c.callbacks[1].fn, sub3.fn)
   end)
 
   it("GetSubscriberTest", function()
-    local sub1 = c:addSubscriber(testfn, {})
-    local sub2 = c:addSubscriber(testfn2, {})
+    local sub1 = c:addSubscriber(testfn)
+    local sub2 = c:addSubscriber(testfn2)
 
     gotten = c:getSubscriber(sub1.id)
 
@@ -51,8 +51,8 @@ describe("mediator", function()
   end)
 
   it("SetPriorityForwardTest", function()
-    local sub1 = c:addSubscriber(testfn, {})
-    local sub2 = c:addSubscriber(testfn2, {})
+    local sub1 = c:addSubscriber(testfn)
+    local sub2 = c:addSubscriber(testfn2)
 
     c:setPriority(sub2.id, 1)
 
@@ -60,8 +60,8 @@ describe("mediator", function()
   end)
 
   it("SetPriorityBackwardsTest", function()
-    local sub1 = c:addSubscriber(testfn, {})
-    local sub2 = c:addSubscriber(testfn2, {})
+    local sub1 = c:addSubscriber(testfn)
+    local sub2 = c:addSubscriber(testfn2)
 
     c:setPriority(sub1.id, 2)
 
@@ -84,8 +84,8 @@ describe("mediator", function()
   end)
 
   it("RemoveSubscriberTest", function()
-    local sub1 = c:addSubscriber(testfn, {})
-    local sub2 = c:addSubscriber(testfn2, {})
+    local sub1 = c:addSubscriber(testfn)
+    local sub2 = c:addSubscriber(testfn2)
 
     c:removeSubscriber(sub2.id)
 
@@ -95,7 +95,7 @@ describe("mediator", function()
   it("GetSubscriberInInternalChannelTest", function()
     c:addChannel("level2")
 
-    local sub1 = c.channels["level2"]:addSubscriber(testfn, {})
+    local sub1 = c.channels["level2"]:addSubscriber(testfn)
 
     gotten = c:getSubscriber(sub1.id)
 
@@ -105,7 +105,7 @@ describe("mediator", function()
   it("RemoveSubscriberInInternalChannelTest", function()
     c:addChannel("level2")
 
-    local sub1 = c.channels["level2"]:addSubscriber(testfn, {})
+    local sub1 = c.channels["level2"]:addSubscriber(testfn)
 
     c:removeSubscriber(sub1.id)
 
@@ -120,7 +120,7 @@ describe("mediator", function()
       olddata = data
     end
 
-    local sub1 = c:addSubscriber(assertFn, {})
+    local sub1 = c:addSubscriber(assertFn)
     c:publish({}, data)
 
     assert.is.truthy(olddata.test)
@@ -142,7 +142,7 @@ describe("mediator", function()
       arguments = { data, wat, seven }
     end
 
-    local sub1 = c:addSubscriber(assertFn, {})
+    local sub1 = c:addSubscriber(assertFn)
     c:publish({}, "test", data, "wat", "seven")
 
     assert.are.equal(#arguments, 3)
@@ -161,8 +161,9 @@ describe("mediator", function()
       olddata = data2
     end
 
-    local sub1 = c:addSubscriber(assertFn, {})
-    local sub2 = c:addSubscriber(assertFn2, {})
+    local sub1 = c:addSubscriber(assertFn)
+    local sub2 = c:addSubscriber(assertFn2)
+
     c:publish({}, data)
 
     assert.are.equal(olddata.test, 1)
@@ -178,7 +179,7 @@ describe("mediator", function()
 
     c:addChannel("level2")
 
-    local sub1 = c.channels["level2"]:addSubscriber(assertFn, {})
+    local sub1 = c.channels["level2"]:addSubscriber(assertFn)
 
     c.channels["level2"]:publish({}, data)
 
