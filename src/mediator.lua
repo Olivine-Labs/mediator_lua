@@ -28,9 +28,10 @@ local function Channel(namespace, parent)
       local priority = (#self.callbacks + 1)
 
       if
-        options and options.priority and
+        options and
+        options.priority and
         options.priority >= 0 and
-        options.priority < (#self.callbacks + 1)
+        options.priority < priority
       then
           priority = options.priority
       end
@@ -41,12 +42,13 @@ local function Channel(namespace, parent)
     end,
 
     getSubscriber = function(self, id)
-      for i, v in pairs(self.callbacks) do
-        if v.id == id then return { index = i, value = v } end
+      for i=1, #self.callbacks do
+        local callback = self.callbacks[i]
+        if callback.id == id then return { index = i, value = callback } end
       end
       local sub
-      for _, v in pairs(self.channels) do
-        sub = v:getSubscriber(id)
+      for _, channel in pairs(self.channels) do
+        sub = channel:getSubscriber(id)
         if sub then break end
       end
       return sub
@@ -78,39 +80,30 @@ local function Channel(namespace, parent)
       local callback = self:getSubscriber(id)
 
       if callback and callback.value then
-        for _, v in pairs(self.channels) do
-          v:removeSubscriber(id)
+        for _, channel in pairs(self.channels) do
+          channel:removeSubscriber(id)
         end
 
         return table.remove(self.callbacks, callback.index)
       end
     end,
 
-    publish = function(self, ...)
-      local result = {}
-
-      for k=1, #self.callbacks do
-        if self.stopped then return result end
-        local v = self.callbacks[k]
+    publish = function(self, result, ...)
+      for i=1, #self.callbacks do
+        local callback = self.callbacks[i]
 
         -- if it doesn't have a predicate, or it does and it's true then run it
-        if not v.options.predicate or (v.options.predicate and v.options.predicate(...)) then
-
+        if not callback.options.predicate or callback.options.predicate(...) then
            -- just take the first result and insert it into the result table
-          table.insert(result, (v.fn(...)))
+          local value, continue = callback.fn(...)
+          if value then table.insert(result, value) end
+          if not continue then return result end
         end
       end
 
       if parent then
-        local value = parent:publish(...)
-        for k=1,#value do table.insert(result, value[k]) end
+        parent:publish(result, ...)
       end
-
-      return result
-    end,
-
-    stopPropagation = function(self)
-      self.stopped = true
     end
   }
 end
@@ -134,7 +127,7 @@ local Mediator = setmetatable(
           channel = channel:getChannel(channelNamespace[i])
         end
 
-        return channel;
+        return channel
       end,
 
       subscribe = function(self, channelNamespace, fn, options)
@@ -150,7 +143,9 @@ local Mediator = setmetatable(
       end,
 
       publish = function(self, channelNamespace, ...)
-        return self:getChannel(channelNamespace):publish(...)
+        local result = {}
+        self:getChannel(channelNamespace):publish(result, ...)
+        return result
       end
     }
   end

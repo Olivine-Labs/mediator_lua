@@ -121,7 +121,7 @@ describe("mediator", function()
     end
 
     local sub1 = c:addSubscriber(assertFn, {})
-    c:publish(data)
+    c:publish({}, data)
 
     assert.is.truthy(olddata.test)
   end)
@@ -143,7 +143,7 @@ describe("mediator", function()
     end
 
     local sub1 = c:addSubscriber(assertFn, {})
-    c:publish("test", data, "wat", "seven")
+    c:publish({}, "test", data, "wat", "seven")
 
     assert.are.equal(#arguments, 3)
   end)
@@ -155,7 +155,6 @@ describe("mediator", function()
 
     local assertFn = function(data)
       olddata = data
-      c:stopPropagation()
     end
 
     local assertFn2 = function(data)
@@ -164,7 +163,7 @@ describe("mediator", function()
 
     local sub1 = c:addSubscriber(assertFn, {})
     local sub2 = c:addSubscriber(assertFn2, {})
-    c:publish(data)
+    c:publish({}, data)
 
     assert.are.equal(olddata.test, 1)
   end)
@@ -194,7 +193,6 @@ describe("mediator", function()
   it("PublishAtMediatorLevelTest", function()
     local assertFn = function(data, channel)
       olddata = data
-      channel:stopPropagation()
     end
 
     local s = m:subscribe({"test"}, assertFn)
@@ -205,7 +203,6 @@ describe("mediator", function()
   it("GetSubscriberAtMediatorLevelTest", function()
     local assertFn = function(data, channel)
       olddata = data
-      channel:stopPropagation()
     end
 
     local s = m:subscribe({"test"}, assertFn)
@@ -247,10 +244,12 @@ describe("mediator", function()
 
     local assertFn = function(data)
       olddata = data
+      return nil, true
     end
 
     local assertFn2 = function(data)
       olddata2 = data
+      return nil, true
     end
 
     c:addChannel("level2")
