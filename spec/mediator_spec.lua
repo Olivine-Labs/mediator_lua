@@ -18,14 +18,14 @@ describe("mediator", function()
     testfn3 = nil
   end)
 
-  it("RegisterCallbacksTest", function()
+  it("can register subscribres", function()
     local sub1 = c:addSubscriber(testfn)
 
     assert.are.equal(#c.callbacks, 1)
     assert.are.equal(c.callbacks[1].fn, testfn)
   end)
 
-  it("RegisterMoreCallbacksTest", function()
+  it("can register lots of subscribers", function()
     local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
 
@@ -33,7 +33,7 @@ describe("mediator", function()
     assert.are.equal(c.callbacks[2].fn, sub2.fn)
   end)
 
-  it("RegisterCallbacksWithPriorityTest", function()
+  it("can register subscribers with specified priorities", function()
     local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
     local sub3 = c:addSubscriber(testfn3, { priority = 1 })
@@ -41,7 +41,7 @@ describe("mediator", function()
     assert.are.equal(c.callbacks[1].fn, sub3.fn)
   end)
 
-  it("GetSubscriberTest", function()
+  it("can return subscribers", function()
     local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
 
@@ -50,7 +50,7 @@ describe("mediator", function()
     assert.are.equal(gotten.value, sub1)
   end)
 
-  it("SetPriorityForwardTest", function()
+  it("can change subscriber priority forward after being added", function()
     local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
 
@@ -59,7 +59,7 @@ describe("mediator", function()
     assert.are.equal(c.callbacks[1], sub2)
   end)
 
-  it("SetPriorityBackwardsTest", function()
+  it("can change subscriber priority backwards after being added", function()
     local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
 
@@ -68,22 +68,22 @@ describe("mediator", function()
     assert.are.equal(c.callbacks[2], sub1)
   end)
 
-  it("AddChannelTest", function()
+  it("can add subchannels", function()
     c:addChannel("level2")
     assert.are_not.equal(c.channels["level2"], nil)
   end)
 
-  it("HasChannelTest", function()
+  it("can check if a subchannel has been added", function()
     c:addChannel("level2")
     assert.is.truthy(c:hasChannel("level2"), true)
   end)
 
-  it("GetChannelTest", function()
+  it("can return channels", function()
     c:addChannel("level2")
     assert.is_not.equal(c:getChannel("level2"), nil)
   end)
 
-  it("RemoveSubscriberTest", function()
+  it("can remove subscribers by id", function()
     local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
 
@@ -92,7 +92,7 @@ describe("mediator", function()
     assert.is.equal(c:getSubscriber(sub2.id), nil)
   end)
 
-  it("GetSubscriberInInternalChannelTest", function()
+  it("can return a subscriber registered to a subchannel", function()
     c:addChannel("level2")
 
     local sub1 = c.channels["level2"]:addSubscriber(testfn)
@@ -102,7 +102,7 @@ describe("mediator", function()
     assert.are.equal(gotten.value, sub1)
   end)
 
-  it("RemoveSubscriberInInternalChannelTest", function()
+  it("can remove a subscriber registered to a subchannel", function()
     c:addChannel("level2")
 
     local sub1 = c.channels["level2"]:addSubscriber(testfn)
@@ -112,7 +112,7 @@ describe("mediator", function()
     assert.is.equal(c.channels["level2"]:getSubscriber(sub1.id), nil)
   end)
 
-  it("PublishTest", function()
+  it("can publish to a channel", function()
     local olddata = { test = false }
     local data = { test = true }
 
@@ -126,15 +126,15 @@ describe("mediator", function()
     assert.is.truthy(olddata.test)
   end)
 
-  it("PublishTest before subscriber exists #broken", function()
+  it("ignores if you publish to a nonexistant subchannel", function()
     assert.is_not.error(function() m:publish({ "nope" }, data) end)
   end)
 
-  it("PublishTest recursive before subscriber exists #broken", function()
+  it("ignores if you publish to a nonexistant subchannel with subchannels", function()
     assert.is_not.error(function() m:publish({ "nope", "wat" }, data) end)
   end)
 
-  it("PublishMultipleArgumentsTest", function()
+  it("sends all the publish arguments to subscribers", function()
     local data = { test = true }
     local arguments
 
@@ -148,7 +148,7 @@ describe("mediator", function()
     assert.are.equal(#arguments, 3)
   end)
 
-  it("StopPublishTest", function()
+  it("can stop propagation", function()
     local olddata = { test = 0 }
     local data = { test = 1 }
     local data2 = { test = 2 }
@@ -169,7 +169,7 @@ describe("mediator", function()
     assert.are.equal(olddata.test, 1)
   end)
 
-  it("PublishUpwardsRecursiveTest", function()
+  it("publishes to parent channels", function()
     local olddata = { test = false }
     local data = { test = true }
 
@@ -186,12 +186,12 @@ describe("mediator", function()
     assert.is.truthy(olddata.test)
   end)
 
-  it("GetChannelAtMediatorLevelTest", function()
+  it("can return a channel from the mediator level", function()
     assert.is_not.equal(m:getChannel({"test", "level2"}), nil)
     assert.are.equal(m:getChannel({"test", "level2"}), m:getChannel({"test"}):getChannel("level2"))
   end)
 
-  it("PublishAtMediatorLevelTest", function()
+  it("can publish to channels from the mediator level", function()
     local assertFn = function(data, channel)
       olddata = data
     end
@@ -201,7 +201,21 @@ describe("mediator", function()
     assert.is_not.equal(m:getChannel({ "test" }):getSubscriber(s.id), nil)
   end)
 
-  it("GetSubscriberAtMediatorLevelTest", function()
+  it("publishes to the proper subchannel", function()
+    local a = spy.new(function() end)
+    local b = spy.new(function() end)
+
+    m:subscribe({ "request", "a" }, a)
+    m:subscribe({ "request", "b" }, b)
+
+    m:publish({ "request", "a" })
+    m:publish({ "request", "b" })
+
+    assert.spy(a).was.called(1)
+    assert.spy(b).was.called(1)
+  end)
+
+  it("can return a subscriber at the mediator level", function()
     local assertFn = function(data, channel)
       olddata = data
     end
@@ -212,7 +226,7 @@ describe("mediator", function()
   end)
 
 
-  it("RemoveSubscriberAtMediatorLevelTest", function()
+  it("can remove a subscriber at the mediator level", function()
     local assertFn = function(data)
       olddata = data
     end
@@ -226,7 +240,7 @@ describe("mediator", function()
     assert.are.equal(m:getSubscriber(s.id, { "test" }), nil)
   end)
 
-  it("PublishSubscriberAtMediatorLevelTest", function()
+  it("can publish to a subscriber at the mediator level", function()
     local olddata = "wat"
 
     local assertFn = function(data)
@@ -239,7 +253,7 @@ describe("mediator", function()
     assert.are.equal(olddata, "hi")
   end)
 
-  it("PublishSubscriberToCallParentsAtMediatorLevelTest", function()
+  it("can publish a subscriber to all parents at the mediator level", function()
     local olddata = "wat"
     local olddata2 = "watwat"
 
