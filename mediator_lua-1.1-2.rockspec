@@ -1,5 +1,5 @@
 package = "mediator_lua"
-version = "1.1-1"
+version = "1.1-2"
 source = {
   url = "https://github.com/Olivine-Labs/mediator_lua/archive/v1.1.tar.gz",
   dir = "mediator_lua-1.1"
@@ -21,6 +21,6 @@ dependencies = {
 build = {
   type = "builtin",
    modules = {
-    mediator_lua = "src/mediator.lua"
+    mediator = "src/mediator.lua"
   }
 }
