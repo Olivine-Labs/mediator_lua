@@ -103,7 +103,9 @@ local function Channel(namespace, parent)
       end
 
       if parent then
-        parent:publish(result, ...)
+        return parent:publish(result, ...)
+      else
+        return result
       end
     end
   }
