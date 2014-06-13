@@ -42,7 +42,7 @@ Example:
 
 ```lua
 Mediator = require "mediator_lua"
-mediator = Mediator() # instantiate a new mediator
+mediator = Mediator() -- instantiate a new mediator
 
 mediator:publish(channel, <data, data, ... >)
 mediator:remove(<channel>) 
@@ -143,7 +143,7 @@ mediator:subscribe({ "application:chat:receiveMessage" }, function(data){ ... })
 -- but not their children
 mediator:publish({ "application", "chat", "receiveMessage" }, "Jack Lawson", "Hey")
 
-# will recursively remove everything under application:chat
+-- will recursively remove everything under application:chat
 mediator:remove({ "application", "chat" })
 ```
 
