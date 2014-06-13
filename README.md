@@ -76,12 +76,12 @@ update and change options. It looks like:
 
 ```lua
 {
-  id, # unique identifier
-  fn, # function you passed in
-  options, # options
-  context, # context for fn to be called within
-  channel, # provides a pointer back to its channel
-  update(options) # function that accepts { fn, options, context }
+  id, -- unique identifier
+  fn, -- function you passed in
+  options, -- options
+  context, -- context for fn to be called within
+  channel, -- provides a pointer back to its channel
+  update(options) -- function that accepts { fn, options, context }
 }
 ```
 
@@ -92,18 +92,21 @@ Examples:
 Mediator = require("mediator_lua")
 local mediator = Mediator()
 
-# Print data when the "message" channel is published to
-# Subscribe returns a "Subscriber" object
-mediator:subscribe("message", function(data) print(data) end);
-mediator:publish("message", "Hello, world");
+-- Print data when the "message" channel is published to
+-- Subscribe returns a "Subscriber" object
+mediator:subscribe({ "message" }, function(data) print(data) end);
+mediator:publish({ "message" }, "Hello, world");
 
   >> Hello, world
 
-# Print the message when the predicate function returns true
-local predicate = function(data) return data.From == "Jack" end
-mediator.Subscribe("channel", function(data) print(data.Message) end, { predicate = predicate });
-mediator.Publish("channel", { Message = "Hey!", From = "Jack" })
-mediator.Publish("channel", { Message = "Hey!", From = "Drew" })
+-- Print the message when the predicate function returns true
+local predicate = function(data) 
+  return data.From == "Jack" 
+end
+
+mediator.Subscribe({ "channel" }, function(data) print(data.Message) end, { predicate = predicate });
+mediator.Publish({ "channel" }, { Message = "Hey!", From = "Jack" })
+mediator.Publish({ "channel" }, { Message = "Hey!", From = "Drew" })
 
   >> Hey!
 ```
@@ -113,11 +116,11 @@ function to remove.
 
 
 ```lua
-# removes all methods bound to a channel 
-mediator:remove("channel")
+-- removes all methods bound to a channel 
+mediator:remove({ "channel" })
 
-# unregisters MethodFN, a named function we defined elsewhere, from "channel" 
-mediator:remove("channel", MethodFN)
+-- unregisters MethodFN, a named function we defined elsewhere, from "channel" 
+mediator:remove({ "channel" }, MethodFN)
 ```
 
 You can call the registered functions with the `publish` method, which accepts 
@@ -125,7 +128,7 @@ an args array:
 
 
 ```lua
-mediator:publish("channel", "argument", "another one", { etc: true }); # args go on forever
+mediator:publish({ "channel" }, "argument", "another one", { etc: true }); # args go on forever
 ```
 
 You can namespace your subscribing / removing / publishing. This will recurisevely
@@ -133,26 +136,26 @@ call children, and also subscribers to direct parents.
 
 
 ```lua
-mediator:subscribe("application:chat:receiveMessage", function(data){ ... })
+mediator:subscribe({ "application:chat:receiveMessage" }, function(data){ ... })
 
-# will recursively call anything in the appllication:chat:receiveMessage namespace 
-# will also call thins directly subscribed to application and application:chat,
-# but not their children
-mediator:publish("application:chat:receiveMessage", "Jack Lawson", "Hey")
+-- will recursively call anything in the appllication:chat:receiveMessage namespace 
+-- will also call thins directly subscribed to application and application:chat,
+-- but not their children
+mediator:publish({ "application", "chat", "receiveMessage" }, "Jack Lawson", "Hey")
 
 # will recursively remove everything under application:chat
-mediator:remove("application:chat")
+mediator:remove({ "application", "chat" })
 ```
 
 You can update Subscriber priority:
 
 
 ```lua
-local sub = mediator:subscribe("application:chat", function(data){ ... })
-local sub2 = mediator:subscribe("application:chat", function(data){ ... })
+local sub = mediator:subscribe({ "application", "chat" }, function(data){ ... })
+local sub2 = mediator:subscribe({ "application", "chat" }, function(data){ ... })
 
-# have sub2 executed first
-mediator.GetChannel("application:chat").SetPriority(sub2.id, 0);
+-- have sub2 executed first
+mediator.GetChannel({ "application", "chat" }).SetPriority(sub2.id, 0);
 ```
 
 You can update Subscriber callback, context, and/or options:
@@ -166,9 +169,9 @@ You can stop the chain of execution by calling channel:stopPropagation()
 
 
 ```lua
-# for example, let's not post the message if the `from` and `to` are the same
-mediator.Subscribe("application:chat", function(data, channel) 
-  # throw an error message or something
+-- for example, let's not post the message if the `from` and `to` are the same
+mediator.Subscribe({ "application", "chat" }, function(data, channel) 
+  -- throw an error message or something
   channel:stopPropagation()
 end, options = {
   predicate = function(data) return data.From == data.To end,
