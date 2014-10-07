@@ -9,7 +9,7 @@ For more information, please see
 
 [View the documentation](http://olivinelabs.com/mediator_lua)
 
-If you have [luarocks](http://luarocks.org), isntall it with `luarocks install mediator_lua`.
+If you have [luarocks](http://luarocks.org), install it with `luarocks install mediator_lua`.
 If you don't, get it. If you really don't want to, just copy mediator.lua from the 
 [Git repository](https://github.com/OlivineLabs/mediator_lua).
 
