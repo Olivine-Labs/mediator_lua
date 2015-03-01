@@ -1,9 +1,12 @@
+local function getUniqueId(obj)
+  return tonumber(tostring(obj):match('0x(%x+)'), 16)
+end
+
 local function Subscriber(fn, options)
-  return {
+  local sub = {
     options = options or {},
     fn = fn,
     channel = nil,
-    id = math.random(1000000000), -- sounds reasonable, rite?
     update = function(self, options)
       if options then
         self.fn = options.fn or self.fn
@@ -11,6 +14,8 @@ local function Subscriber(fn, options)
       end
     end
   }
+  sub.id = getUniqueId(sub)
+  return sub
 end
 
 -- Channel class and functions --
