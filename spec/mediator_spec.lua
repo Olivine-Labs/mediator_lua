@@ -18,7 +18,7 @@ describe("mediator", function()
     testfn3 = nil
   end)
 
-  it("can register subscribres", function()
+  it("can register subscribers", function()
     local sub1 = c:addSubscriber(testfn)
 
     assert.are.equal(#c.callbacks, 1)
