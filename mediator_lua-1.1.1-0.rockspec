@@ -1,7 +1,7 @@
 package = "mediator_lua"
 version = "1.1.1-0"
 source = {
-  url = "https://github.com/Olivine-Labs/mediator_lua/archive/v1.1.1.tar.gz",
+  url = "https://github.com/Olivine-Labs/mediator_lua/archive/v1.1.0.tar.gz",
   dir = "mediator_lua-1.1.1"
 }
 description = {
