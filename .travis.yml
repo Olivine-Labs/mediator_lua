@@ -1,16 +1,19 @@
 language: erlang
 
 env:
-  - LUA=""
-  - LUA="luajit"
+  - LUA="Lua 5.1"
+  - LUA="Lua 5.2"
+  - LUA="Lua 5.3"
+  - LUA="LuaJIT 2.0"
 
 branches:
   only:
     - master
 
+before_install:
+  - bash .travis_setup.sh
+
 install:
-  - sudo apt-get install luajit
-  - sudo apt-get install luarocks
   - sudo luarocks install luafilesystem
   - git clone git://github.com/Olivine-Labs/say.git
   - cd say
