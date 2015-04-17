@@ -1,5 +1,5 @@
 local function getUniqueId(obj)
-  return tonumber(tostring(obj):match('0x(%x+)'), 16)
+  return tonumber(tostring(obj):match(':%s*[0xX]*(%x+)'), 16)
 end
 
 local function Subscriber(fn, options)
