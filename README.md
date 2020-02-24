@@ -5,7 +5,7 @@ Version 1.1.2
 
 For more information, please see 
 
-[View the project on Github](https://github.com/OlivineLabs/mediator_lua)
+[View the project on Github](https://github.com/Olivine-Labs/mediator_lua)
 
 [View the documentation](http://olivinelabs.com/mediator_lua)
 
